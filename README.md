@@ -3,7 +3,7 @@
 Helm-чарты платформы, публикуемые по релизам: `platform` (сервисы) и `platform-base`
 (Postgres/Kafka/S3/elastic/redis/mailpit + контракт для `platform`). Docker-версия живёт в
 [platform-selfhost](https://github.com/intabia-fusion/platform-selfhost); этот репозиторий — для
-Kubernetes, прода и self-host у заказчика.
+Kubernetes.
 
 ## Что внутри
 
