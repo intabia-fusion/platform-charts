@@ -124,6 +124,8 @@ ConfigMap/Secret `platform-base` с адресами, которые читае�
   (`v0.8.37`). `imageRegistry` пустой = Docker Hub, `imageNamespace` по умолчанию `intabiafusion`.
 - `helm search repo platform-charts --versions` покажет доступные версии; ставить конкретную:
   `PLATFORM_VERSION=v0.8.37 ./scripts/install.sh`.
+- Pre-release чарт (например `0.8.73-rc2`) можно поставить с релизными образами:
+  `PLATFORM_VERSION=v0.8.73 CHART_VERSION=0.8.73-rc2 ./scripts/install.sh`.
 
 ## Секреты
 
