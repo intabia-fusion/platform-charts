@@ -25,7 +25,9 @@ PROFILE="${PROFILE:-bundled}"
 case "$PROFILE" in bundled|external) ;; *) echo "PROFILE must be bundled or external" >&2; exit 2 ;; esac
 VERSION="${PLATFORM_VERSION:-${1:-}}"
 [ -n "$VERSION" ] || { echo "usage: PLATFORM_VERSION=vX.Y.Z PROFILE=bundled|external $0" >&2; exit 2; }
-CHART_VERSION="${VERSION#v}"
+# Chart version defaults to the image tag; CHART_VERSION lets a prerelease chart (0.8.73-rc2)
+# run the release images (v0.8.73).
+CHART_VERSION="${CHART_VERSION:-${VERSION#v}}"
 CHARTS_URL="${CHARTS_URL:-https://intabia-fusion.github.io/platform-charts}"
 NS="${NS:-platform}"
 NS_BASE="${NS_BASE:-platform-base}"
