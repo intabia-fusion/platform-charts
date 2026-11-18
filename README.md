@@ -31,6 +31,27 @@ Charts repo: `https://intabia-fusion.github.io/platform-charts` (GitHub Pages и
   для своего TLS поставь `tls.enabled: false` в `values/base-*.yaml` и настрой TLSStore/сертификат сам.
 - S3-совместимое хранилище (bundled: silo; external: свой бакет).
 
+## Бакеты S3
+
+Каждый тип данных живёт в своём бакете, чтобы retention и права не пересекались:
+
+| Бакет | Что внутри | Кто пишет |
+| --- | --- | --- |
+| `<stand>` | datalake: файлы, аватарки, вложения | datalake |
+| `<stand>-chunks` | чанки загрузок datalake | datalake |
+| `<stand>-backups` | инкрементальные бэкапы пространств | backup, workspace-service (`BACKUP_BUCKET`) |
+| `postgres-backups` | WAL + base backup CNPG | оператор CNPG |
+| `<stand>-love-recordings` | записи встреч (если включён love) | love/egress |
+
+`<stand>` — `global.stand` (по умолчанию имя релиза). Имя бакета инкрементальных бэкапов можно
+переопределить: `config.backupBucket` в values чарта `platform` (по умолчанию `<stand>-backups`).
+Бакет Postgres задаётся отдельно: `postgres.backup.bucket` в `platform-base` (по умолчанию
+`postgres-backups`).
+
+**Bundled silo** создаёт бакеты при первой записи. Для **внешнего S3** создайте их заранее (или
+разрешите `s3:CreateBucket`), а ключам выдайте `GetObject/PutObject/DeleteObject/ListBucket` на
+все пять. `postgres-backups` нужен только если `postgres.mode=internal` с включёнными бэкапами.
+
 ## Быстрый старт (bundled)
 
 ```bash
