@@ -3,7 +3,7 @@
 Helm-чарты платформы, публикуемые по релизам: `platform` (сервисы) и `platform-base`
 (Postgres/Kafka/S3/elastic/redis/mailpit + контракт для `platform`). Docker-версия живёт в
 [platform-selfhost](https://github.com/intabia-fusion/platform-selfhost); этот репозиторий — для
-Kubernetes.
+Kubernetes, прода и self-host у заказчика.
 
 ## Что внутри
 
@@ -44,6 +44,41 @@ PROFILE=bundled PLATFORM_VERSION=v0.8.37 ./scripts/install.sh
 
 `install.sh` ставит `platform-base` в `platform-base`, затем `platform` в `platform`
 (`global.namespace`, `global.baseNamespace`, `global.version` подставляются из окружения).
+
+## Namespace
+
+По умолчанию `platform-base` ставится в `platform-base`, `platform` — в `platform`.
+Можно любые имена:
+
+```bash
+NS=acme-app NS_BASE=acme-base PROFILE=bundled PLATFORM_VERSION=v0.8.73 ./scripts/install.sh
+```
+
+Оба чарта можно поставить в **один** namespace (например, отдельный namespace заказчика):
+
+```bash
+SINGLE_NAMESPACE=1 NS=acme PROFILE=bundled PLATFORM_VERSION=v0.8.73 ./scripts/install.sh
+```
+
+`global.namespace` в чарте `platform` — это namespace, в который пишутся ресурсы (не только
+релиз Helm), поэтому он должен совпадать с `-n`. `install.sh` подставляет его сам; при ручном
+`helm upgrade` задавай `--set global.namespace=<ns> --set global.baseNamespace=<base-ns>`.
+
+## Частичный external
+
+Если снаружи только часть сервисов, не бери `base-external.yaml` (он выключает всё):
+оставь `PROFILE=bundled` и перечисли компоненты в `EXTERNAL`:
+
+```bash
+EXTERNAL=postgres,s3 PROFILE=bundled PLATFORM_VERSION=v0.8.73 ./scripts/install.sh
+```
+
+Оверлеи лежат в `values/external/` (`postgres`, `kafka`, `s3`, `elastic`, `redis`, `mailpit`,
+`livekit`); остальные компоненты остаются внутренними. Каждый оверлей ставит
+`enabled: false` + `mode: external` — при `enabled: false` без `mode: external` рендер падает
+с ошибкой (защита от «выключил и забыл»).
+
+Проверить команды без установки: `DRY_RUN=1 ... ./scripts/install.sh`.
 
 ## Внешняя инфраструктура (prod)
 

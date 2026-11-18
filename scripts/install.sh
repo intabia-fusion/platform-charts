@@ -27,9 +27,20 @@ VERSION="${PLATFORM_VERSION:-${1:-}}"
 [ -n "$VERSION" ] || { echo "usage: PLATFORM_VERSION=vX.Y.Z PROFILE=bundled|external $0" >&2; exit 2; }
 CHART_VERSION="${VERSION#v}"
 CHARTS_URL="${CHARTS_URL:-https://intabia-fusion.github.io/platform-charts}"
-NS_BASE="${NS_BASE:-platform-base}"
 NS="${NS:-platform}"
+NS_BASE="${NS_BASE:-platform-base}"
+# Both charts in one namespace: SINGLE_NAMESPACE=1 (e.g. a customer-owned "acme" namespace).
+[ "${SINGLE_NAMESPACE:-0}" = 1 ] && NS_BASE="$NS"
 TIMEOUT="${HELM_TIMEOUT:-15m}"
+
+# DRY_RUN=1 prints the helm commands instead of running them.
+run() {
+  if [ "${DRY_RUN:-0}" = 1 ]; then
+    printf '+ %s\n' "$*"
+  else
+    "$@"
+  fi
+}
 
 command -v helm >/dev/null 2>&1 || { echo "helm is required" >&2; exit 2; }
 
@@ -37,6 +48,20 @@ BASE_ARGS=()
 PLATFORM_ARGS=()
 [ -f "values/secrets-base.yaml" ] && BASE_ARGS+=(-f "values/secrets-base.yaml")
 [ -f "values/secrets-platform.yaml" ] && PLATFORM_ARGS+=(-f "values/secrets-platform.yaml")
+
+# Base profile: bundled (everything inside), external (all managed), or bundled + selected
+# external overlays: EXTERNAL=postgres,s3 keeps Kafka/elastic/redis/mailpit inside.
+BASE_FILES=(-f "values/base-bundled.yaml")
+if [ "$PROFILE" = external ]; then
+  BASE_FILES=(-f "values/base-external.yaml")
+elif [ -n "${EXTERNAL:-}" ]; then
+  IFS=',' read -ra EXTERNAL_PARTS <<< "$EXTERNAL"
+  for part in "${EXTERNAL_PARTS[@]}"; do
+    overlay="values/external/$part.yaml"
+    [ -f "$overlay" ] || { echo "unknown EXTERNAL component '$part' (see values/external/)" >&2; exit 2; }
+    BASE_FILES+=(-f "$overlay")
+  done
+fi
 
 chart_ref() {
   local name="$1"
@@ -52,19 +77,19 @@ VERSION_ARGS=()
 [ -z "${CHARTS_DIR:-}" ] && VERSION_ARGS=(--version "$CHART_VERSION")
 
 if [ -z "${CHARTS_DIR:-}" ]; then
-  helm repo add platform-charts "$CHARTS_URL" --force-update >/dev/null
-  helm repo update platform-charts >/dev/null
+  run helm repo add platform-charts "$CHARTS_URL" --force-update >/dev/null
+  run helm repo update platform-charts >/dev/null
 fi
 
 echo ">> platform-base $CHART_VERSION ($PROFILE) in $NS_BASE"
-helm upgrade --install platform-base "$(chart_ref platform-base)" \
+run helm upgrade --install platform-base "$(chart_ref platform-base)" \
   "${VERSION_ARGS[@]}" \
   -n "$NS_BASE" --create-namespace \
-  -f "values/base-$PROFILE.yaml" "${BASE_ARGS[@]}" \
+  "${BASE_FILES[@]}" "${BASE_ARGS[@]}" \
   --timeout "$TIMEOUT" --wait
 
 echo ">> platform $CHART_VERSION ($PROFILE) in $NS"
-helm upgrade --install platform "$(chart_ref platform)" \
+run helm upgrade --install platform "$(chart_ref platform)" \
   "${VERSION_ARGS[@]}" \
   -n "$NS" --create-namespace \
   -f "values/platform-$PROFILE.yaml" "${PLATFORM_ARGS[@]}" \
@@ -73,6 +98,10 @@ helm upgrade --install platform "$(chart_ref platform)" \
   --set "global.version=$VERSION" \
   --timeout "$TIMEOUT" --wait
 
+if [ "${DRY_RUN:-0}" = 1 ]; then
+  echo ">> dry run: see the commands above"
+  exit 0
+fi
 HOST="$(helm -n "$NS" get values platform -o json | python3 -c 'import json,sys; print(json.load(sys.stdin)["global"]["hostUrl"])')"
 echo
 echo ">> installed $VERSION: https://$HOST"
