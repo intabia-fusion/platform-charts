@@ -2,8 +2,28 @@ apiVersion: v1
 entries:
   platform:
   - apiVersion: v2
+    appVersion: 0.8.76
+    created: "2026-11-24T16:06:49.390148+07:00"
+    description: Helm chart for the fusion platform. Installs the platform services
+      from one values file. Expects postgres, Kafka, S3-compatible storage, elastic
+      and an ingress with TLS, provided either via values or by the platform-base
+      chart contract (ConfigMap/Secret platform-base).
+    digest: ac2c44fa474e0c85c2a262eefa589804cbccf15a6e65f4474089a8fca1426cb9
+    keywords:
+    - fusion
+    - platform
+    - helm
+    maintainers:
+    - email: haiodo@gmail.com
+      name: haiodo
+    name: platform
+    type: application
+    urls:
+    - https://intabia-fusion.github.io/platform-charts/platform-0.8.76.tgz
+    version: 0.8.76
+  - apiVersion: v2
     appVersion: 0.8.74
-    created: "2026-11-18T15:50:24.963997+07:00"
+    created: "2026-11-24T16:06:49.387289+07:00"
     description: Helm chart for the fusion platform. Installs the platform services
       from one values file. Expects postgres, Kafka, S3-compatible storage, elastic
       and an ingress with TLS, provided either via values or by the platform-base
@@ -23,7 +43,7 @@ entries:
     version: 0.8.74
   - apiVersion: v2
     appVersion: 0.8.73
-    created: "2026-11-18T15:50:24.961371+07:00"
+    created: "2026-11-24T16:06:49.384973+07:00"
     description: Helm chart for the fusion platform. Installs the platform services
       from one values file. Expects postgres, Kafka, S3-compatible storage, elastic
       and an ingress with TLS, provided either via values or by the platform-base
@@ -43,7 +63,7 @@ entries:
     version: 0.8.73
   - apiVersion: v2
     appVersion: 0.8.73-rc2
-    created: "2026-11-18T15:50:24.959201+07:00"
+    created: "2026-11-24T16:06:49.380741+07:00"
     description: Helm chart for the fusion platform. Installs the platform services
       from one values file. Expects postgres, Kafka, S3-compatible storage, elastic
       and an ingress with TLS, provided either via values or by the platform-base
@@ -63,8 +83,28 @@ entries:
     version: 0.8.73-rc2
   platform-base:
   - apiVersion: v2
+    appVersion: 0.8.76
+    created: "2026-11-24T16:06:49.398226+07:00"
+    description: 'Environment for the fusion platform: postgres, Kafka (Strimzi),
+      S3-compatible storage (silo), elastic, redis, mailpit. Publishes the platform-base
+      ConfigMap/Secret contract consumed by the platform chart.'
+    digest: 4e5929554d00e48bbdf41862e04ecae28319fe9953dfb039643789b8bed5443b
+    keywords:
+    - fusion
+    - platform
+    - infrastructure
+    - helm
+    maintainers:
+    - email: haiodo@gmail.com
+      name: haiodo
+    name: platform-base
+    type: application
+    urls:
+    - https://intabia-fusion.github.io/platform-charts/platform-base-0.8.76.tgz
+    version: 0.8.76
+  - apiVersion: v2
     appVersion: 0.8.74
-    created: "2026-11-18T15:50:24.96638+07:00"
+    created: "2026-11-24T16:06:49.396738+07:00"
     description: 'Environment for the fusion platform: postgres, Kafka (Strimzi),
       S3-compatible storage (silo), elastic, redis, mailpit. Publishes the platform-base
       ConfigMap/Secret contract consumed by the platform chart.'
@@ -84,7 +124,7 @@ entries:
     version: 0.8.74
   - apiVersion: v2
     appVersion: 0.8.73
-    created: "2026-11-18T15:50:24.965763+07:00"
+    created: "2026-11-24T16:06:49.395495+07:00"
     description: 'Environment for the fusion platform: postgres, Kafka (Strimzi),
       S3-compatible storage (silo), elastic, redis, mailpit. Publishes the platform-base
       ConfigMap/Secret contract consumed by the platform chart.'
@@ -104,7 +144,7 @@ entries:
     version: 0.8.73
   - apiVersion: v2
     appVersion: 0.8.73-rc2
-    created: "2026-11-18T15:50:24.96489+07:00"
+    created: "2026-11-24T16:06:49.392836+07:00"
     description: 'Environment for the fusion platform: postgres, Kafka (Strimzi),
       S3-compatible storage (silo), elastic, redis, mailpit. Publishes the platform-base
       ConfigMap/Secret contract consumed by the platform chart.'
@@ -122,4 +162,4 @@ entries:
     urls:
     - https://intabia-fusion.github.io/platform-charts/platform-base-0.8.73-rc2.tgz
     version: 0.8.73-rc2
-generated: "2026-11-18T15:50:24.956578+07:00"
+generated: "2026-11-24T16:06:49.376851+07:00"
