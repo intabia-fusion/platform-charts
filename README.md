@@ -16,7 +16,10 @@ values/
   platform-external.yaml  platform против внешней инфраструктуры
   secrets-*.example.yaml  шаблоны credentials (копируются в secrets-*.yaml, gitignored)
 scripts/install.sh        установка и апгрейд (идемпотентно)
+scripts/apply.sh          то же под именем apply: канонический цикл diff -> apply -> rollback
 scripts/upgrade.sh        то же, отдельная точка входа для runbook'ов
+scripts/diff.sh           что изменит apply, без изменений (нужен helm-diff)
+scripts/rollback.sh       откат обоих релизов: --list, на ревизию назад, на заданную
 ```
 
 Charts repo: `https://intabia-fusion.github.io/platform-charts` (GitHub Pages из `docs/`).
@@ -100,6 +103,18 @@ EXTERNAL=postgres,s3 PROFILE=bundled PLATFORM_VERSION=v0.8.73 ./scripts/install.
 с ошибкой (защита от «выключил и забыл»).
 
 Проверить команды без установки: `DRY_RUN=1 ... ./scripts/install.sh`.
+
+Обновление стенда - только этими скриптами, чтобы у каждого не появлялся свой набор:
+
+```bash
+PROFILE=bundled PLATFORM_VERSION=v0.8.76 ./scripts/diff.sh    # что изменится (helm-diff)
+PROFILE=bundled PLATFORM_VERSION=v0.8.76 ./scripts/apply.sh   # platform-base, затем platform
+./scripts/rollback.sh --list                                  # история обоих релизов
+./scripts/rollback.sh                                         # на ревизию назад
+```
+
+`apply.sh`/`diff.sh` - те же `install.sh` (с `DIFF=1` и без), флаги и порядок релизов совпадают.
+`rollback.sh` идёт в обратном порядке: сначала `platform`, потом `platform-base`.
 
 ## Внешняя инфраструктура (prod)
 
